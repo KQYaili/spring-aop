@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <context:annotation-config></context:annotation-config>
+    <context:component-scan base-package="com.lgd"></context:component-scan>
+    <bean id="bookDAO" class="com.lgd.dao.BookDAOImpl"></bean>
+    <bean id="studentDAO" class="com.lgd.dao.StudentDAOImpl"></bean>
+    <bean id="logManager" class="com.lgd.utils.LogManager"></bean>
+    <bean id="BookServiceImpl" class="com.lgd.service.BookServiceImpl"></bean>
+    <bean id="MyAspect" class="com.lgd.utils.MyAspect"></bean>
+    <!---->
+    <bean id="txManager" class="com.lgd.utils.TxManager"></bean>
+    <aop:config>
+        <!--声明切入点-->
+
+        <aop:pointcut id="book_pc1" expression="execution(void com.lgd.dao.BookDAOImpl.*())"/>
+        <aop:pointcut id="book_pc2" expression="execution(void com.lgd.dao.BookDAOImpl.*(..))"/>
+        <aop:pointcut id="book_pc3" expression="execution(* com.lgd.dao.BookDAOImpl.*())"/>
+        <aop:pointcut id="book_pc4" expression="execution(* com.lgd.dao.BookDAOImpl.*(..))"/>
+        <aop:pointcut id="pc5" expression="execution(* com.lgd.dao.*.*(..))"/>
+        <aop:pointcut id="pc6" expression="execution(* com.lgd.dao.*.insert(..))"/>
+        <aop:pointcut id="pc7" expression="execution(* *(..))"/>
+        <!--声明txManager为切面类-->
+        <aop:aspect ref="txManager">
+            <!--通知-->
+            <aop:before method="begin" pointcut-ref="pc7"/>
+            <aop:after method="commit" pointcut-ref="pc7"/>
+        </aop:aspect>
+        <aop:aspect ref="logManager">
+            <aop:before method="printLog" pointcut-ref="pc5"></aop:before>
+        </aop:aspect>
+        <aop:aspect ref="MyAspect">
+            <aop:before method="method1" pointcut-ref="pc6"></aop:before>
+            <aop:before method="method2" pointcut-ref="pc6"></aop:before>
+            <aop:after-throwing method="method3" pointcut-ref="pc6"></aop:after-throwing>
+            <aop:after-returning method="method4" pointcut-ref="pc6"></aop:after-returning>
+            <aop:around method="method5" pointcut-ref="pc6"></aop:around>
+        </aop:aspect>
+    </aop:config>
+
+</beans>
